@@ -9,10 +9,7 @@ const userRouter = Router();
 
 userRouter.post(
   "/signup",
-  multerLocal(fileTypes.image, "user").fields([
-    { name: "profile_cover", maxCount: 1 },
-    { name: "attachments", maxCount: 3 },
-  ]),
+  multerLocal(fileTypes.image, "user").single("attachment"),
   US.signup
 );
 userRouter.patch("/confirm-email", validation(UV.confirmEmailSchema), US.confirmEmail);

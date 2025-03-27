@@ -1,38 +1,41 @@
 import { OAuth2Client } from "google-auth-library";
 import { providerTypes, roleTypes, userModel } from "../../db/models/index.js";
 import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken, verifyToken } from "./../../utils/index.js";
+import cloudinary from "../../utils/cloudnary/index.js";
 
 //------------------------------------------ signup ------------------------------------------------
 export const signup = asyncHandler(async (req, res, next) => {
   const { name, email, password, phone, gender } = req.body;
 
-  //check if user exist
-  if (await userModel.findOne({ email })) {
-    return next(new Error("user already exist", { cause: 409 }));
-  }
+  // //check if user exist
+  // if (await userModel.findOne({ email })) {
+  //   return next(new Error("user already exist", { cause: 409 }));
+  // }
 
   // check if image exist
-  if (!req.files) {
+  if (!req.file) {
     return next(new Error("image is required", { cause: 400 }));
   }
 
-  const imagePath = [];
-  for (const file of req.files.attachments) {
-    imagePath.push(file.path);
-  }
+  const data = await cloudinary.uploader.upload(req.file.path);
 
-  // hash password
-  const hashedPassword = await Hash({ key: password, SALT_ROUNDS: process.env.SALT_ROUNDS });
+  // const imagePath = [];
+  // for (const file of req.files.attachments) {
+  //   imagePath.push(file.path);
+  // }
 
-  // encrypt phone
-  const encryptedPhone = await Encrypt({ key: phone, SECRET_KEY: process.env.SECRET_KEY });
+  // // hash password
+  // const hashedPassword = await Hash({ key: password, SALT_ROUNDS: process.env.SALT_ROUNDS });
 
-  //send email otp
-  eventEmitter.emit("sendEmailOtp", { email });
+  // // encrypt phone
+  // const encryptedPhone = await Encrypt({ key: phone, SECRET_KEY: process.env.SECRET_KEY });
 
-  // create user
-  const user = await userModel.create({ name, email, password: hashedPassword, phone: encryptedPhone, gender, coverImage: imagePath, image: req.files.profile_cover[0].path });
-  return res.status(200).json({ message: "user added successfully", user });
+  // //send email otp
+  // eventEmitter.emit("sendEmailOtp", { email });
+
+  // // create user
+  // const user = await userModel.create({ name, email, password: hashedPassword, phone: encryptedPhone, gender, coverImage: imagePath, image: req.files.profile_cover[0].path });
+  return res.status(200).json({ message: "user added successfully", data });
 });
 
 //------------------------------------------ confirm Email ------------------------------------------------
