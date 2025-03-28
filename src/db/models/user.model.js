@@ -61,8 +61,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    image: String,
-    coverImage: [String],
+    image: {
+      secure_url: String,
+      public_id: String
+    },
+    coverImage: [
+      {
+        secure_url: String,
+        public_id: String
+      }],
     changePasswordAt: Date,
     otpEmail: String,
     otpPassword: String,

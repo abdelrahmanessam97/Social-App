@@ -37,3 +37,20 @@ export const multerLocal = (customValidationType = [], customPath = "generals") 
 
   return upload;
 };
+
+export const multerHost = (customValidationType = []) => {
+
+  const storage = multer.diskStorage({});
+
+  const fileFilter = (req, file, cb) => {
+    if (customValidationType.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(Error("invalid file type"), false);
+    }
+  };
+
+  const upload = multer({ storage, fileFilter });
+
+  return upload;
+};
