@@ -1,7 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { providerTypes, roleTypes, userModel } from "../../db/models/index.js";
-import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken, verifyToken } from "./../../utils/index.js";
 import cloudinary from "../../utils/cloudnary/index.js";
+import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken, verifyToken } from "./../../utils/index.js";
 
 //------------------------------------------ signup ------------------------------------------------
 export const signup = asyncHandler(async (req, res, next) => {
