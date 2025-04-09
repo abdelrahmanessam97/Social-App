@@ -7,23 +7,28 @@ import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken, veri
 export const signup = asyncHandler(async (req, res, next) => {
   const { name, email, password, phone, gender } = req.body;
 
-  //check if user exist
-  if (await userModel.findOne({ email })) {
-    return next(new Error("user already exist", { cause: 409 }));
-  }
+  // //check if user exist
+  // if (await userModel.findOne({ email })) {
+  //   return next(new Error("user already exist", { cause: 409 }));
+  // }
 
   // check if image exist
   if (!req.file) {
     return next(new Error("image is required", { cause: 400 }));
   }
 
-  const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path);
+  const data = await cloudinary.uploader.upload(req.file.path, {
+    folder: "social-app/users",
+    resource_type: "image",
+    // public_id: `users/${req.file.originalname}`,
+    // use_filename: true,
+    // unique_filename: false,
+  });
 
   // const imagePath = [];
   // for (const file of req.files.attachments) {
   //   imagePath.push(file.path);
   // }
-
 
   // upload multiple image on cloudinary
   // const arrPaths = [];
@@ -32,19 +37,19 @@ export const signup = asyncHandler(async (req, res, next) => {
   //   arrPaths.push({ secure_url, public_id });
   // }
 
-  // hash password
-  const hashedPassword = await Hash({ key: password, SALT_ROUNDS: process.env.SALT_ROUNDS });
+  // // hash password
+  // const hashedPassword = await Hash({ key: password, SALT_ROUNDS: process.env.SALT_ROUNDS });
 
-  // encrypt phone
-  const encryptedPhone = await Encrypt({ key: phone, SECRET_KEY: process.env.SECRET_KEY });
+  // // encrypt phone
+  // const encryptedPhone = await Encrypt({ key: phone, SECRET_KEY: process.env.SECRET_KEY });
 
-  //send email otp
-  eventEmitter.emit("sendEmailOtp", { email });
+  // //send email otp
+  // eventEmitter.emit("sendEmailOtp", { email });
 
-  // create user
-  const user = await userModel.create({ name, email, password: hashedPassword, phone: encryptedPhone, gender, image: { secure_url, public_id } });
+  // // create user
+  // const user = await userModel.create({ name, email, password: hashedPassword, phone: encryptedPhone, gender, image: { secure_url, public_id } });
 
-  return res.status(200).json({ message: "user added successfully", user });
+  return res.status(200).json({ message: "user added successfully", data });
 });
 
 //------------------------------------------ confirm Email ------------------------------------------------
