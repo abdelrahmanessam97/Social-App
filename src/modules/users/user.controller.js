@@ -7,7 +7,7 @@ import { fileTypes, multerHost, multerLocal } from "../../middleware/multer.js";
 
 const userRouter = Router();
 
-userRouter.post("/signup", multerHost(fileTypes.image).single("attachment"), US.signup);
+userRouter.post("/signup", multerHost(fileTypes.image).single("attachment"), validation(UV.signupSchema), US.signup);
 userRouter.patch("/confirm-email", validation(UV.confirmEmailSchema), US.confirmEmail);
 
 userRouter.post("/login", validation(UV.signinSchema), US.signin);

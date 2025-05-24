@@ -4,7 +4,7 @@ import { generalsRules } from "../../utils/index.js";
 
 export const signupSchema = joi
   .object({
-    name: joi.string().alphanum().min(3).max(30).required(),
+    name: joi.string().min(3).max(30).required(),
     email: generalsRules.email.required(),
     password: generalsRules.password.required(),
     cPassword: generalsRules.password.valid(joi.ref("password")).required(),
@@ -13,7 +13,8 @@ export const signupSchema = joi
       .regex(/^01[0125][0-9]{8}$/)
       .required(),
     gender: joi.string().valid(genderTypes.male, genderTypes.female).required(),
-    role: joi.string().valid(roleTypes.user, roleTypes.admin).required(),
+    role: joi.string().valid(roleTypes.user, roleTypes.admin),
+    file: joi.object().required(),
   })
   .required();
 

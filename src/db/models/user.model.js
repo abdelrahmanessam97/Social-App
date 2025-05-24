@@ -63,13 +63,14 @@ const userSchema = new mongoose.Schema(
     },
     image: {
       secure_url: String,
-      public_id: String
+      public_id: String,
     },
     coverImage: [
       {
         secure_url: String,
-        public_id: String
-      }],
+        public_id: String,
+      },
+    ],
     changePasswordAt: Date,
     otpEmail: String,
     otpPassword: String,
