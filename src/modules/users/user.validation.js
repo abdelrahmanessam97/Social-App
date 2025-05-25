@@ -64,3 +64,9 @@ export const updateProfileSchema = joi.object({
   // attachments: joi.array().items(generalsRules.file.required()).required(), // // by using method array in multer
   // }).required(),
 });
+
+export const updatePasswordSchema = joi.object({
+  oldPassword: generalsRules.password.required(),
+  newPassword: generalsRules.password.required(),
+  cPassword: generalsRules.password.required().valid(joi.ref("newPassword")),
+});

@@ -23,6 +23,8 @@ userRouter.get("/refresh_token", validation(UV.refreshTokenSchema), US.refreshTo
 userRouter.patch("/forgot_password", validation(UV.forgotPasswordSchema), US.forgotPassword);
 userRouter.patch("/reset_password", validation(UV.resetPasswordSchema), US.resetPassword);
 
+userRouter.patch("/update_password", validation(UV.updatePasswordSchema), authentication, US.updatePassword);
+
 userRouter.patch("/update_profile", multerHost(fileTypes.image).single("attachment"), validation(UV.updateProfileSchema), authentication, US.updateProfile);
 
 export default userRouter;

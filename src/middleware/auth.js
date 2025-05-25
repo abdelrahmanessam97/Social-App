@@ -32,12 +32,13 @@ export const authentication = asyncHandler(async (req, res, next) => {
 
   // get user
   const user = await userModel.findById(decoded.id);
+
   if (!user) {
     return next(new Error("user not found", { cause: 400 }));
   }
 
   // check if user changed password after the token was issued
-  if (parseInt(user?.passwordChangedAt?.getTime() / 1000) > decoded.iat) {
+  if (parseInt(user?.changePasswordAt?.getTime() / 1000) > decoded.iat) {
     return next(new Error("token expired please login again", { cause: 400 }));
   }
 

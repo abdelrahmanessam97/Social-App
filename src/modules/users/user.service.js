@@ -257,7 +257,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json({ message: "password reset successfully" });
 });
-//------------------------------------------ reset Password ------------------------------------------------
+//------------------------------------------ update Profile ------------------------------------------------
 
 export const updateProfile = asyncHandler(async (req, res, next) => {
   if (req.body.phone) {
@@ -276,4 +276,21 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
   const user = await userModel.findByIdAndUpdate({ _id: req.user.id }, req.body, { new: true });
 
   return res.status(200).json({ message: "profile updated successfully", user });
+});
+//------------------------------------------ update Password ------------------------------------------------
+
+export const updatePassword = asyncHandler(async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+
+  // check if password is valid
+  if (!(await Compare({ key: oldPassword, hashedKey: req.user.password }))) {
+    return next(new Error("password is invalid", { cause: 400 }));
+  }
+
+  // hash password
+  const hashedPassword = await Hash({ key: newPassword, SALT_ROUNDS: process.env.SALT_ROUNDS });
+
+  const user = await userModel.findByIdAndUpdate({ _id: req.user.id }, { password: hashedPassword, changePasswordAt: Date.now() }, { new: true });
+
+  return res.status(200).json({ message: "password updated successfully", user });
 });
