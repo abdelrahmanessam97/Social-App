@@ -14,7 +14,8 @@ export const signupSchema = joi
       .required(),
     gender: joi.string().valid(genderTypes.male, genderTypes.female).required(),
     role: joi.string().valid(roleTypes.user, roleTypes.admin),
-    file: joi.object().required(),
+    file: generalsRules.file.required(),
+    // files: joi.array().items(generalsRules.file.required()).required(), // // by using method array in multer
   })
   .required();
 
@@ -52,3 +53,14 @@ export const resetPasswordSchema = joi
     cPassword: generalsRules.password.valid(joi.ref("newPassword")).required(),
   })
   .required();
+
+export const updateProfileSchema = joi.object({
+  name: joi.string().min(3).max(30),
+  gender: joi.string().valid(genderTypes.male, genderTypes.female),
+  role: joi.string().valid(roleTypes.user, roleTypes.admin),
+  file: generalsRules.file,
+  // files: joi.object({
+  // attachment :joi.array().items(generalsRules.file.required()).required(), // // by using method fields in multer
+  // attachments: joi.array().items(generalsRules.file.required()).required(), // // by using method array in multer
+  // }).required(),
+});

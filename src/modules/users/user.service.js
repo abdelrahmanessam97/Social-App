@@ -7,17 +7,17 @@ import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken, veri
 export const signup = asyncHandler(async (req, res, next) => {
   const { name, email, password, phone, gender } = req.body;
 
-  // //check if user exist
-  // if (await userModel.findOne({ email })) {
-  //   return next(new Error("user already exist", { cause: 409 }));
-  // }
+  //check if user exist
+  if (await userModel.findOne({ email })) {
+    return next(new Error("user already exist", { cause: 409 }));
+  }
 
   // check if image exist
   if (!req.file) {
     return next(new Error("image is required", { cause: 400 }));
   }
 
-  const data = await cloudinary.uploader.upload(req.file.path, {
+  const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
     folder: "social-app/users",
     resource_type: "image",
     // public_id: `users/${req.file.originalname}`,
@@ -37,19 +37,19 @@ export const signup = asyncHandler(async (req, res, next) => {
   //   arrPaths.push({ secure_url, public_id });
   // }
 
-  // // hash password
-  // const hashedPassword = await Hash({ key: password, SALT_ROUNDS: process.env.SALT_ROUNDS });
+  // hash password
+  const hashedPassword = await Hash({ key: password, SALT_ROUNDS: process.env.SALT_ROUNDS });
 
-  // // encrypt phone
-  // const encryptedPhone = await Encrypt({ key: phone, SECRET_KEY: process.env.SECRET_KEY });
+  // encrypt phone
+  const encryptedPhone = await Encrypt({ key: phone, SECRET_KEY: process.env.SECRET_KEY });
 
-  // //send email otp
-  // eventEmitter.emit("sendEmailOtp", { email });
+  //send email otp
+  eventEmitter.emit("sendEmailOtp", { email });
 
-  // // create user
-  // const user = await userModel.create({ name, email, password: hashedPassword, phone: encryptedPhone, gender, image: { secure_url, public_id } });
+  // create user
+  const user = await userModel.create({ name, email, password: hashedPassword, phone: encryptedPhone, gender, image: { secure_url, public_id } });
 
-  return res.status(200).json({ message: "user added successfully", data });
+  return res.status(200).json({ message: "user added successfully", user });
 });
 
 //------------------------------------------ confirm Email ------------------------------------------------
@@ -256,4 +256,24 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   await userModel.updateOne({ email }, { password: hashedPassword, confirmed: true, $unset: { otpPassword: 0 } });
 
   return res.status(200).json({ message: "password reset successfully" });
+});
+//------------------------------------------ reset Password ------------------------------------------------
+
+export const updateProfile = asyncHandler(async (req, res, next) => {
+  if (req.body.phone) {
+    req.body.phone = await Encrypt({ key: req.body.phone, SALT_ROUNDS: process.env.SALT_ROUNDS });
+  }
+
+  if (req.file) {
+    await cloudinary.uploader.destroy(req.user.image.public_id);
+    // upload image
+    const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
+      folder: "social-app/users",
+    });
+
+    req.body.image = { secure_url, public_id };
+  }
+  const user = await userModel.findByIdAndUpdate({ _id: req.user.id }, req.body, { new: true });
+
+  return res.status(200).json({ message: "profile updated successfully", user });
 });

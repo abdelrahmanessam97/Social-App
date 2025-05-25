@@ -1,4 +1,4 @@
-import userModel from "../db/models/user.model.js";
+import { userModel } from "../db/models/user.model.js";
 import { verifyToken } from "../utils/index.js";
 import { asyncHandler } from "./../utils/error/index.js";
 
@@ -24,7 +24,7 @@ export const authentication = asyncHandler(async (req, res, next) => {
   }
 
   // verify a token symmetric - synchronous
-  const decoded = verifyToken({ token, SIGNATURE: SIGNATURE_TOKEN });
+  const decoded = await verifyToken({ token, SIGNATURE: SIGNATURE_TOKEN });
 
   if (!decoded?.id) {
     return next(new Error("token is invalid", { cause: 400 }));

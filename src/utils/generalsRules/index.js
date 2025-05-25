@@ -23,4 +23,18 @@ export const generalsRules = {
     "accept-encoding": joi.string(),
     connection: joi.string(),
   }),
+  file: joi
+    .object({
+      size: joi.number().positive().required(),
+      path: joi.string().required(),
+      filename: joi.string().required(),
+      destination: joi.string().required(),
+      mimetype: joi.string().required(),
+      encoding: joi.string().required(),
+      originalname: joi.string().required(),
+      fieldname: joi.string().valid("attachment", "attachments").required(),
+    })
+    .messages({
+      "any.required": "file is required",
+    }),
 };
