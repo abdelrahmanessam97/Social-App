@@ -1,6 +1,6 @@
 export const validation = (schema) => {
   return async (req, res, next) => {
-    let inputData = { ...req.body, ...req.params, ...req.query };
+    let inputData = { ...req.body, ...req.params, ...req.query, ...(req.file ? { file: req.file } : {}), ...(req.files ? { files: req.files } : {}) };
 
     const result = schema.validate(inputData, { abortEarly: false });
 

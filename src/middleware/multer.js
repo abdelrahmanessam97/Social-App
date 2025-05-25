@@ -39,7 +39,6 @@ export const multerLocal = (customValidationType = [], customPath = "generals") 
 };
 
 export const multerHost = (customValidationType = []) => {
-
   const storage = multer.diskStorage({});
 
   const fileFilter = (req, file, cb) => {
