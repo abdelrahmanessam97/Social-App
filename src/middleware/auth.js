@@ -2,9 +2,12 @@ import { userModel } from "../db/models/user.model.js";
 import { verifyToken } from "../utils/index.js";
 import { asyncHandler } from "./../utils/error/index.js";
 
-export const authentication = asyncHandler(async (req, res, next) => {
-  const { authorization } = req.headers;
+export const tokenType = {
+  access: "access",
+  refresh: "refresh",
+};
 
+export const decoded = async ({ authorization, tokenType }) => {
   const [prefix, token] = authorization?.split(" ") ?? ["", ""];
 
   // Check if any of the required fields are missing
@@ -13,18 +16,18 @@ export const authentication = asyncHandler(async (req, res, next) => {
   }
 
   // Check if prefix is valid
-  let SIGNATURE_TOKEN = undefined;
+  let ACCESS_SIGNATURE = undefined;
 
   if (prefix === process.env.PREFIX_TOKEN_USER) {
-    SIGNATURE_TOKEN = process.env.SIGNATURE_TOKEN_USER;
+    ACCESS_SIGNATURE = process.env.SIGNATURE_TOKEN_USER;
   } else if (prefix === process.env.PREFIX_TOKEN_ADMIN) {
-    SIGNATURE_TOKEN = process.env.SIGNATURE_TOKEN_ADMIN;
+    ACCESS_SIGNATURE = process.env.SIGNATURE_TOKEN_ADMIN;
   } else {
     return next(new Error("prefix is invalid", { cause: 400 }));
   }
 
   // verify a token symmetric - synchronous
-  const decoded = await verifyToken({ token, SIGNATURE: SIGNATURE_TOKEN });
+  const decoded = await verifyToken({ token, SIGNATURE: ACCESS_SIGNATURE });
 
   if (!decoded?.id) {
     return next(new Error("token is invalid", { cause: 400 }));
@@ -46,6 +49,13 @@ export const authentication = asyncHandler(async (req, res, next) => {
   if (user?.isDeleted) {
     return next(new Error("user is deleted", { cause: 400 }));
   }
+};
+
+export const authentication = asyncHandler(async (req, res, next) => {
+  const { authorization } = req.headers;
+
+  // verify token
+  decoded({ authorization });
 
   // add user to request
   req.user = user;

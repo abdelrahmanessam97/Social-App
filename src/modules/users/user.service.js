@@ -118,7 +118,7 @@ export const loginWithGmail = asyncHandler(async (req, res, next) => {
   // generate token
   const access_token = await generateToken({
     payload: { email, id: user._id },
-    SIGNATURE: user.role == roleTypes.user ? process.env.SIGNATURE_TOKEN_USER : process.env.SIGNATURE_TOKEN_ADMIN,
+    SIGNATURE: user.role == roleTypes.user ? process.env.ACCESS_SIGNATURE_USER : process.env.ACCESS_SIGNATURE_ADMIN,
     option: { expiresIn: "1d" },
   });
 
@@ -150,13 +150,13 @@ export const signin = asyncHandler(async (req, res, next) => {
   // generate token
   const access_token = await generateToken({
     payload: { email, id: user._id },
-    SIGNATURE: user.role == roleTypes.user ? process.env.SIGNATURE_TOKEN_USER : process.env.SIGNATURE_TOKEN_ADMIN,
+    SIGNATURE: user.role == roleTypes.user ? process.env.ACCESS_SIGNATURE_USER : process.env.ACCESS_SIGNATURE_ADMIN,
     option: { expiresIn: "1d" },
   });
 
   const refresh_token = await generateToken({
     payload: { email, id: user._id },
-    SIGNATURE: user.role == roleTypes.user ? process.env.SIGNATURE_TOKEN_USER : process.env.SIGNATURE_TOKEN_ADMIN,
+    SIGNATURE: user.role == roleTypes.user ? process.env.REFRESH_SIGNATURE_USER : process.env.REFRESH_SIGNATURE_ADMIN,
     option: { expiresIn: "1w" },
   });
 
@@ -182,9 +182,9 @@ export const refreshToken = asyncHandler(async (req, res, next) => {
   let SIGNATURE_TOKEN = undefined;
 
   if (prefix === process.env.PREFIX_TOKEN_USER) {
-    SIGNATURE_TOKEN = process.env.SIGNATURE_TOKEN_USER;
+    SIGNATURE_TOKEN = process.env.ACCESS_SIGNATURE_USER;
   } else if (prefix === process.env.PREFIX_TOKEN_ADMIN) {
-    SIGNATURE_TOKEN = process.env.SIGNATURE_TOKEN_ADMIN;
+    SIGNATURE_TOKEN = process.env.ACCESS_SIGNATURE_ADMIN;
   } else {
     return next(new Error("prefix is invalid", { cause: 400 }));
   }
@@ -206,7 +206,7 @@ export const refreshToken = asyncHandler(async (req, res, next) => {
   // generate token
   const access_token = await generateToken({
     payload: { email: user.email, id: user._id },
-    SIGNATURE: user.role == roleTypes.user ? process.env.SIGNATURE_TOKEN_USER : process.env.SIGNATURE_TOKEN_ADMIN,
+    SIGNATURE: user.role == roleTypes.user ? process.env.ACCESS_SIGNATURE_USER : process.env.ACCESS_SIGNATURE_ADMIN,
     option: { expiresIn: "1d" },
   });
 
