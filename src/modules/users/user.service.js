@@ -1,7 +1,8 @@
 import { OAuth2Client } from "google-auth-library";
 import { providerTypes, roleTypes, userModel } from "../../db/models/index.js";
+import { decodedToken, tokenTypes } from "../../middleware/auth.js";
 import cloudinary from "../../utils/cloudnary/index.js";
-import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken, verifyToken } from "./../../utils/index.js";
+import { Compare, Encrypt, Hash, asyncHandler, eventEmitter, generateToken } from "./../../utils/index.js";
 
 //------------------------------------------ signup ------------------------------------------------
 export const signup = asyncHandler(async (req, res, next) => {
@@ -172,36 +173,7 @@ export const signin = asyncHandler(async (req, res, next) => {
 export const refreshToken = asyncHandler(async (req, res, next) => {
   const { authorization } = req.body;
 
-  const [prefix, token] = authorization?.split(" ") || ["", ""];
-
-  if (!prefix || !token) {
-    return next(new Error("token not found", { cause: 400 }));
-  }
-
-  // Check if prefix is valid
-  let SIGNATURE_TOKEN = undefined;
-
-  if (prefix === process.env.PREFIX_TOKEN_USER) {
-    SIGNATURE_TOKEN = process.env.ACCESS_SIGNATURE_USER;
-  } else if (prefix === process.env.PREFIX_TOKEN_ADMIN) {
-    SIGNATURE_TOKEN = process.env.ACCESS_SIGNATURE_ADMIN;
-  } else {
-    return next(new Error("prefix is invalid", { cause: 400 }));
-  }
-
-  // verify a token symmetric - synchronous
-  const decoded = await verifyToken({ token, SIGNATURE: SIGNATURE_TOKEN });
-
-  if (!decoded?.id) {
-    return next(new Error("token is invalid", { cause: 400 }));
-  }
-
-  // get user
-  const user = await userModel.findById(decoded.id);
-
-  if (!user) {
-    return next(new Error("user not found", { cause: 400 }));
-  }
+  const user = await decodedToken({ authorization, tokenType: tokenTypes.refresh, next });
 
   // generate token
   const access_token = await generateToken({
