@@ -73,12 +73,20 @@ const userSchema = new mongoose.Schema(
     ],
     changePasswordAt: Date,
     otpEmail: String,
+    otpNewEmail: String,
+    tempEmail: String,
     otpPassword: String,
     provider: {
       type: String,
       enum: Object.values(providerTypes),
       default: providerTypes.system,
     },
+    viewers: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        time: [Date],
+      },
+    ],
   },
   { timestamps: true }
 );

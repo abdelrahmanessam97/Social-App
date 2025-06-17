@@ -65,6 +65,10 @@ export const updateProfileSchema = joi.object({
   // }).required(),
 });
 
+export const shareProfileSchema = joi.object({
+  id: generalsRules.id.required(),
+});
+
 export const updatePasswordSchema = joi.object({
   oldPassword: generalsRules.password.required(),
   newPassword: generalsRules.password.required(),

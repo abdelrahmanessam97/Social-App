@@ -27,4 +27,6 @@ userRouter.patch("/update_password", validation(UV.updatePasswordSchema), authen
 
 userRouter.patch("/update_profile", multerHost(fileTypes.image).single("attachment"), validation(UV.updateProfileSchema), authentication, US.updateProfile);
 
+userRouter.get("/share_profile/:id", validation(UV.shareProfileSchema), authentication, US.shareProfile);
+
 export default userRouter;

@@ -229,6 +229,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json({ message: "password reset successfully" });
 });
+
 //------------------------------------------ update Profile ------------------------------------------------
 
 export const updateProfile = asyncHandler(async (req, res, next) => {
@@ -249,6 +250,7 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json({ message: "profile updated successfully", user });
 });
+
 //------------------------------------------ update Password ------------------------------------------------
 
 export const updatePassword = asyncHandler(async (req, res, next) => {
@@ -265,4 +267,56 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
   const user = await userModel.findByIdAndUpdate({ _id: req.user.id }, { password: hashedPassword, changePasswordAt: Date.now() }, { new: true });
 
   return res.status(200).json({ message: "password updated successfully", user });
+});
+
+//------------------------------------------ shareProfile ------------------------------------------------
+
+export const shareProfile = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const user = await userModel.findOne({ _id: id, isDeleted: false });
+
+  if (!user) {
+    return next(new Error("Email is not exist or deleted", { cause: 400 }));
+  }
+
+  if (req.user._id.toString === id) {
+    return res.status(200).json({ message: "ok", user: req.user });
+  }
+
+  const emailExist = user.viewers.find((viewer) => {
+    return viewer.userId.toString() === req.user._id.toString();
+  });
+
+  if (emailExist) {
+    emailExist.time.push(Date.now());
+    if (emailExist.time.length > 5) {
+      emailExist.time = emailExist.time.slice(-5);
+    }
+  } else {
+    user.viewers.push({ userId: req.user._id, time: [Date.now()] });
+  }
+
+  await user.save();
+
+  return res.status(200).json({ message: "Share Profile successfully", user });
+});
+
+//------------------------------------------ updateEmail ------------------------------------------------
+
+export const updateEmail = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await userModel.findOne({ email, isDeleted: false });
+
+  if (user) {
+    return next(new Error("Email is already exist", { cause: 400 }));
+  }
+
+  eventEmitter.emit("sendEmailOtp", { email: req.user.email });
+  eventEmitter.emit("sendNewEmailOtp", { email: req.user.email });
+
+  await userModel.updateOne({ _id: req.user.id }, { tempEmail: email });
+
+  return res.status(200).json({ message: "Update Email successfully" });
 });
