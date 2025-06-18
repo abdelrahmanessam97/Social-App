@@ -29,4 +29,7 @@ userRouter.patch("/update_profile", multerHost(fileTypes.image).single("attachme
 
 userRouter.get("/share_profile/:id", validation(UV.shareProfileSchema), authentication, US.shareProfile);
 
+userRouter.patch("/update/email", validation(UV.updateEmailSchema), authentication, US.updateEmail);
+userRouter.patch("/replace/email", validation(UV.replaceEmailSchema), authentication, US.replaceEmail);
+
 export default userRouter;

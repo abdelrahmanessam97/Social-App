@@ -313,10 +313,45 @@ export const updateEmail = asyncHandler(async (req, res, next) => {
     return next(new Error("Email is already exist", { cause: 400 }));
   }
 
-  eventEmitter.emit("sendEmailOtp", { email: req.user.email });
-  eventEmitter.emit("sendNewEmailOtp", { email: req.user.email });
-
   await userModel.updateOne({ _id: req.user.id }, { tempEmail: email });
 
+  eventEmitter.emit("sendEmailOtp", { email: req.user.email, id: req.user.id });
+  eventEmitter.emit("sendNewEmailOtp", { email: email, id: req.user.id });
+
   return res.status(200).json({ message: "Update Email successfully" });
+});
+
+//------------------------------------------ replaceEmail ------------------------------------------------
+
+export const replaceEmail = asyncHandler(async (req, res, next) => {
+  const { oldCode, newCode } = req.body;
+
+  const user = await userModel.findOne({ _id: req.user.id, isDeleted: false });
+
+  if (!user) {
+    return next(new Error("Email not exist or deleted", { cause: 400 }));
+  }
+
+  if (!(await Compare({ key: oldCode, hashedKey: user.otpEmail }))) {
+    return next(new Error("Invalid old code ", { cause: 400 }));
+  }
+
+  if (!(await Compare({ key: newCode, hashedKey: user.otpNewEmail }))) {
+    return next(new Error("Invalid new code ", { cause: 400 }));
+  }
+
+  await userModel.updateOne(
+    { _id: req.user.id },
+    {
+      email: user.tempEmail,
+      $unset: {
+        tempEmail: 0,
+        otpEmail: 0,
+        otpNewEmail: 0,
+      },
+      changePasswordAt: Date.now(),
+    }
+  );
+
+  return res.status(200).json({ message: "replace Email successfully" });
 });

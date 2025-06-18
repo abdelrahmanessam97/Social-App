@@ -27,28 +27,28 @@ eventEmitter.on("sendEmail", async (data) => {
 });
 
 eventEmitter.on("sendEmailOtp", async (data) => {
-  const { email } = data;
+  const { email, id } = data;
 
   // confirm email otp
   const otp = customAlphabet("1234567890", 6)();
 
   // hash otp in database
   const hashedOtp = await Hash({ key: otp, SALT_ROUNDS: process.env.SALT_ROUNDS });
-  await userModel.updateOne({ email }, { otpEmail: hashedOtp, message: "Confirm your email" });
+  await userModel.updateOne({ email, _id: id }, { otpEmail: hashedOtp, message: "Confirm your email" });
 
   // send email
   await sendEmail(email, "confirm your email", html({ otp }));
 });
 
 eventEmitter.on("sendNewEmailOtp", async (data) => {
-  const { email } = data;
+  const { email, id } = data;
 
   // confirm email otp
   const otp = customAlphabet("1234567890", 6)();
 
   // hash otp in database
   const hashedOtp = await Hash({ key: otp, SALT_ROUNDS: process.env.SALT_ROUNDS });
-  await userModel.updateOne({ email }, { otpNewEmail: hashedOtp, message: "Confirm your email" });
+  await userModel.updateOne({ tempEmail: email, _id: id }, { otpNewEmail: hashedOtp, message: "Confirm new email" });
 
   // send email
   await sendEmail(email, "confirm your email", html({ otp }));

@@ -69,8 +69,23 @@ export const shareProfileSchema = joi.object({
   id: generalsRules.id.required(),
 });
 
-export const updatePasswordSchema = joi.object({
-  oldPassword: generalsRules.password.required(),
-  newPassword: generalsRules.password.required(),
-  cPassword: generalsRules.password.required().valid(joi.ref("newPassword")),
-});
+export const updatePasswordSchema = joi
+  .object({
+    oldPassword: generalsRules.password.required(),
+    newPassword: generalsRules.password.required(),
+    cPassword: generalsRules.password.required().valid(joi.ref("newPassword")),
+  })
+  .required();
+
+export const updateEmailSchema = joi
+  .object({
+    email: generalsRules.email.required(),
+  })
+  .required();
+
+export const replaceEmailSchema = joi
+  .object({
+    oldCode: joi.string().length(5).required(),
+    newCode: joi.string().length(5).required(),
+  })
+  .required();
