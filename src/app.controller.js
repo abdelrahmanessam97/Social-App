@@ -3,6 +3,7 @@ import connectionDb from "./db/connectionDb.js";
 import userRouter from "./modules/users/user.controller.js";
 import path from "path";
 import { globalErrorHandler } from "./utils/error/index.js";
+import postRouter from "./modules/posts/post.controller.js";
 const bootstrap = async (app, express) => {
   // middleware to parse json
   app.use(express.json());
@@ -21,6 +22,7 @@ const bootstrap = async (app, express) => {
   app.get("/", (req, res) => res.send("Hello My App ( Social App )"));
 
   app.use("/users", userRouter);
+  app.use("/posts", postRouter);
 
   // error handling middleware
   app.use("*", (req, res, next) => {
